@@ -1,12 +1,26 @@
-const request = require('request');
-const url = 'https://api.darksky.net/forecast/a9ebf16afcb249fd73eae9455f311e41/37.8267,-122.4233';
-const param = {
-    url: url,
-    json: true
-};
+require('dotenv').config();
+const geoCode = require('./utils/geocode');
+const forecast = require('./utils/forecast');
 
-request(param, (error, response, body) => {
-    const temp = body.currently.temperature;
-    const chance = body.currently.precipProbability;
-    console.log('It is currently ' + temp + ' degree out. There is a ' +chance+ '% chance of rain.');
-});
+const place = process.argv[2];
+
+if (!place) {
+    console.log('Please enter a place name!')
+} else {
+    geoCode(place, (error, { longitude, latitude, location }) => {
+        if (!!error) {
+            console.log(error);
+            return;
+        }
+
+        forecast(longitude, latitude, (error, forecastData) => {
+            if (!!error) {
+                console.log(error);
+                return;
+            }
+
+            console.log(location);
+            console.log(forecastData);
+        });
+    });
+}
